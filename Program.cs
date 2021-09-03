@@ -48,13 +48,13 @@ namespace TwitchSwordBot
                     } else if (chatMessage.Message.StartsWith("!banword ")) {
                         string[] split = chatMessage.Message.Split(" ");
                         if (split.Length >= 2) {
-                            swordBot.AddBannedWord(HelperFunctions.GetStringRemainder(chatMessage.Message, "!banword"));
+                            swordBot.AddBannedWord(HelperFunctions.GetStringRemainder(chatMessage.Message.Trim(), "!banword"));
                             await swordBot.SendMessage(chatMessage.Channel, "Banned word");
                         }
                     } else if (chatMessage.Message.StartsWith("!unbanword ")) {
                         string[] split = chatMessage.Message.Split(" ");
                         if (split.Length >= 2) {
-                            swordBot.AddBannedWord(HelperFunctions.GetStringRemainder(chatMessage.Message, "!unbanword"));
+                            swordBot.RemoveBannedWord(HelperFunctions.GetStringRemainder(chatMessage.Message.Trim(), "!unbanword"));
                             await swordBot.SendMessage(chatMessage.Channel, "Unbanned word");
                         }
                     }
