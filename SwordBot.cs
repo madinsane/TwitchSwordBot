@@ -9,6 +9,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace TwitchSwordBot {
+    /// <summary>
+    /// Core class for a twitch bot
+    /// </summary>
     class SwordBot {
         const string USER_FILE = "User.txt";
         const string BANNED_WORDS_FILE = "BannedWords.txt";
@@ -21,20 +24,27 @@ namespace TwitchSwordBot {
         private StreamReader tcpReader;
         public delegate void ChatEventHandler(object sender, ChatMessage e);
         public event ChatEventHandler OnMessage = delegate { };
+        /// <summary>
+        /// If <c>true</c> writes all received messages to console
+        /// </summary>
         public bool VerboseConsole { get; set; } = false;
         private bool isAlive;
         private HashSet<string> joinedChannels;
-        private Dictionary<string, string> BannedWords;
+        private Dictionary<string, string> bannedWords;
 
         public SwordBot() {
             joinedChannels = new HashSet<string>();
-            BannedWords = new Dictionary<string, string>();
+            bannedWords = new Dictionary<string, string>();
             GetUserInfo();
             GetBannedWords();
             Console.WriteLine("User set to: " + User);
             //Console.WriteLine(Pass);
         }
 
+        /// <summary>
+        /// Starts the bot
+        /// </summary>
+        /// <returns></returns>
         public async Task Start() {
             //Init TCP connection
             TcpClient tcpClient = new();
@@ -145,8 +155,8 @@ namespace TwitchSwordBot {
                     string[] lines = File.ReadAllLines(BANNED_WORDS_FILE);
                     foreach (string line in lines) {
                         string trim = line.Trim();
-                        if (!BannedWords.ContainsKey(trim) && !string.IsNullOrWhiteSpace(trim)) {
-                            BannedWords.Add(trim.ToLower(),
+                        if (!bannedWords.ContainsKey(trim) && !string.IsNullOrWhiteSpace(trim)) {
+                            bannedWords.Add(trim.ToLower(),
                                 HelperFunctions.ConvertStringToPlain(trim.ToLower()).ToLower());
                         }
                     }
@@ -157,33 +167,46 @@ namespace TwitchSwordBot {
             }
         }
 
+        /// <summary>
+        /// Adds a new banned word/phrase
+        /// </summary>
+        /// <param name="banWord">Word/phrase to ban</param>
         public void AddBannedWord(string banWord) {
-            if (!BannedWords.ContainsKey(banWord)) {
-                BannedWords.Add(banWord, HelperFunctions.ConvertStringToPlain(banWord));
+            if (!bannedWords.ContainsKey(banWord)) {
+                bannedWords.Add(banWord, HelperFunctions.ConvertStringToPlain(banWord));
             }
             WriteToBannedWords();
         }
 
+        /// <summary>
+        /// Removes an existing banned word/phrase
+        /// </summary>
+        /// <param name="banWord">Word/phrase to remove</param>
         public void RemoveBannedWord(string banWord) {
-            if (BannedWords.ContainsKey(banWord)) {
-                BannedWords.Remove(banWord);
+            if (bannedWords.ContainsKey(banWord)) {
+                bannedWords.Remove(banWord);
             }
             WriteToBannedWords();
         }
 
         private void WriteToBannedWords() {
-            File.WriteAllLines(BANNED_WORDS_FILE, BannedWords.Keys);
+            File.WriteAllLines(BANNED_WORDS_FILE, bannedWords.Keys);
         }
 
+        /// <summary>
+        /// Checks a string for banned words/phrases using homoglyph parsing
+        /// </summary>
+        /// <param name="str">String to check for banned phrases</param>
+        /// <returns><c>true</c> if contains any banned phrases, <c>false</c> otherwise</returns>
         public bool CheckStringForBannedWords(string str) {
             string[] split = str.Split(" ");
             for (int i=0; i<split.Length; i++) {
                 if (i+1 < split.Length) {
-                    if (CheckIfBannedWord(split[i], split.Skip(i+1).ToArray(), BannedWords)) {
+                    if (CheckIfBannedWord(split[i], split.Skip(i+1).ToArray(), bannedWords)) {
                         return true;
                     }
                 } else {
-                    if (CheckIfBannedWord(split[i], new string[0], BannedWords)) {
+                    if (CheckIfBannedWord(split[i], new string[0], bannedWords)) {
                         return true;
                     }
                 }
@@ -232,22 +255,42 @@ namespace TwitchSwordBot {
             return sslPolicyErrors == SslPolicyErrors.None;
         }
 
+        /// <summary>
+        /// Sends a message to a given channel from bot
+        /// </summary>
+        /// <param name="channel">Channel to send message to</param>
+        /// <param name="message">Message to send</param>
+        /// <returns></returns>
         public async Task SendMessage(string channel, string message) {
             await connected.Task;
             await tcpWriter.WriteLineAsync($"PRIVMSG #{channel} :{message}");
             Console.WriteLine($"SENT #{channel} {User}: {message}");
         }
 
+        /// <summary>
+        /// Joins a channel to read messages
+        /// </summary>
+        /// <param name="channel">Channel to join</param>
+        /// <returns></returns>
         public async Task JoinChannel(string channel) {
             await connected.Task;
             await tcpWriter.WriteLineAsync($"JOIN #{channel}");
         }
 
+        /// <summary>
+        /// Leaves a channel to stop reading messages from there
+        /// </summary>
+        /// <param name="channel">Channel to leave</param>
+        /// <returns></returns>
         public async Task LeaveChannel(string channel) {
             await connected.Task;
             await tcpWriter.WriteLineAsync($"PART #{channel}");
         }
 
+        /// <summary>
+        /// Graceful shutdown of the bot
+        /// </summary>
+        /// <returns></returns>
         public async Task Kill() {
             await SendMessage(User, "MrDestructoid 7 boop beep MrDestructoid 7");
             isAlive = false;

@@ -22,7 +22,7 @@ namespace TwitchSwordBot
                 Console.WriteLine($"#{chatMessage.Channel} {chatMessage.Sender}: {chatMessage.Message}");
                 ChatTags chatTags = new();
                 if (chatMessage.Tags != "") {
-                    chatTags = ParseTags(chatMessage.Tags);
+                    chatTags = HelperFunctions.ParseTags(chatMessage.Tags);
                 }
                 if (chatTags.HasPrivilege() && chatMessage.Channel == swordBot.User) {
                     //Home commands
@@ -75,39 +75,6 @@ namespace TwitchSwordBot
                 }
             };
             await Task.Delay(-1);
-        }
-
-        private static ChatTags ParseTags(string tags) {
-            string tagsTrim = tags.TrimStart('@');
-            string[] tagsSplit = tagsTrim.Split(";");
-            ChatTags chatTags = new();
-            foreach (string tag in tagsSplit) {
-                if (tag.StartsWith("badges")) {
-                    //Parse badges
-                    if (tag.IndexOf("broadcaster") >= 0) {
-                        chatTags.IsBroadcaster = true;
-                    }
-                    if (tag.IndexOf("subscriber") >= 0) {
-                        chatTags.IsSub = true;
-                    }
-                    if (tag.IndexOf("admin") >= 0 ||
-                        tag.IndexOf("staff") >= 0 ||
-                        tag.IndexOf("global_mod") >= 0 ||
-                        tag.IndexOf("moderator") >= 0) {
-                        chatTags.IsMod = true;
-                    }
-                } else if (tag.StartsWith("id")) {
-                    chatTags.MsgId = HelperFunctions.GetStringRemainder(tag, "id=");
-                } else if (tag.StartsWith("mod")) {
-                    chatTags.IsMod = HelperFunctions.GetStringRemainder(tag, "mod=") == "1";
-                } else if (tag.StartsWith("subscriber")) {
-                    chatTags.IsSub = HelperFunctions.GetStringRemainder(tag, "subscriber=") == "1";
-                } else if (tag.StartsWith("user-id")) {
-                    chatTags.UserId = HelperFunctions.GetStringRemainder(tag, "user-id=");
-                }
-            }
-            
-            return chatTags;
         }
     }
 }
