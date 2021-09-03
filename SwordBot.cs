@@ -72,7 +72,8 @@ namespace TwitchSwordBot {
             isAlive = true;
             while (isAlive) {
                 await connected.Task;
-                string line = await tcpReader.ReadLineAsync();
+                string line = "";
+                line = await tcpReader.ReadLineAsync();
                 if (VerboseConsole) {
                     Console.WriteLine(line);
                 }
@@ -82,6 +83,7 @@ namespace TwitchSwordBot {
                 string remLine = line;
                 if (string.IsNullOrEmpty(line)) {
                     await Task.Delay(20);
+                    continue;
                 }
                 if (line.StartsWith("@")) {
                     string[] tagSplit = line.Split(" ");

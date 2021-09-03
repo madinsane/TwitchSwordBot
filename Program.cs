@@ -48,13 +48,13 @@ namespace TwitchSwordBot
                     } else if (chatMessage.Message.StartsWith("!banword ")) {
                         string[] split = chatMessage.Message.Split(" ");
                         if (split.Length >= 2) {
-                            swordBot.AddBannedWord(HelperFunctions.GetStringRemainder(chatMessage.Message.Trim(), "!banword"));
+                            swordBot.AddBannedWord(HelperFunctions.GetStringRemainder(chatMessage.Message, "!banword ").Trim());
                             await swordBot.SendMessage(chatMessage.Channel, "Banned word");
                         }
                     } else if (chatMessage.Message.StartsWith("!unbanword ")) {
                         string[] split = chatMessage.Message.Split(" ");
                         if (split.Length >= 2) {
-                            swordBot.RemoveBannedWord(HelperFunctions.GetStringRemainder(chatMessage.Message.Trim(), "!unbanword"));
+                            swordBot.RemoveBannedWord(HelperFunctions.GetStringRemainder(chatMessage.Message.Trim(), "!unbanword ").Trim());
                             await swordBot.SendMessage(chatMessage.Channel, "Unbanned word");
                         }
                     }
@@ -65,6 +65,7 @@ namespace TwitchSwordBot
                     if (swordBot.CheckStringForBannedWords(chatMessage.Message)) {
                         banning = true;
                         await swordBot.SendMessage(chatMessage.Channel, "BAD WORD DETECTED MrDestructoid");
+                        //await swordBot.SendMessage(chatMessage.Channel, $"/timeout {chatMessage.Sender} 1");
                     }
                 //}
                 //General commands
