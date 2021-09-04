@@ -61,13 +61,13 @@ namespace TwitchSwordBot
                 }
                 bool banning = false;
                 //Message checks
-                //if (!chatTags.HasPrivilege()) {
+                if (!chatTags.HasPrivilege()) {
                     if (swordBot.CheckStringForBannedWords(chatMessage.Message)) {
                         banning = true;
                         await swordBot.SendMessage(chatMessage.Channel, "BAD WORD DETECTED MrDestructoid");
-                        //await swordBot.SendMessage(chatMessage.Channel, $"/timeout {chatMessage.Sender} 1");
+                        await swordBot.SendMessage(chatMessage.Channel, $"/timeout {chatMessage.Sender} 30");
                     }
-                //}
+                }
                 //General commands
                 if (!banning) {
                     if (chatMessage.Message.StartsWith("!Hi")) {
