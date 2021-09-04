@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Security;
@@ -7,6 +8,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace TwitchSwordBot {
     /// <summary>
@@ -31,8 +33,14 @@ namespace TwitchSwordBot {
         private bool isAlive;
         private HashSet<string> joinedChannels;
         private Dictionary<string, string> bannedWords;
+        private int privmsgBucket;
+        private Stopwatch privmsgBucketTimer;
+        const int BUCKET_MAX = 100;
+        const int BUCKET_REFILL_RATE = 30000;
 
         public SwordBot() {
+            privmsgBucket = BUCKET_MAX;
+            privmsgBucketTimer = new();
             joinedChannels = new HashSet<string>();
             bannedWords = new Dictionary<string, string>();
             GetUserInfo();
@@ -265,6 +273,7 @@ namespace TwitchSwordBot {
         /// <returns></returns>
         public async Task SendMessage(string channel, string message) {
             await connected.Task;
+            await CheckRateLimit();
             await tcpWriter.WriteLineAsync($"PRIVMSG #{channel} :{message}");
             Console.WriteLine($"SENT #{channel} {User}: {message}");
         }
@@ -296,6 +305,35 @@ namespace TwitchSwordBot {
         public async Task Kill() {
             await SendMessage(User, "MrDestructoid 7 boop beep MrDestructoid 7");
             isAlive = false;
+        }
+
+        /// <summary>
+        /// Ensures the rate limit is never exceeded
+        /// </summary>
+        /// Assumes worst case refill timer on the bucket
+        /// <returns></returns>
+        private async Task CheckRateLimit()
+        {
+            if (!privmsgBucketTimer.IsRunning)
+            {
+                privmsgBucketTimer.Start();
+            }
+            if (privmsgBucket <= 0)
+            {
+                int waitTime = BUCKET_REFILL_RATE - ((int)privmsgBucketTimer.ElapsedMilliseconds);
+                if (waitTime < 0)
+                {
+                    waitTime = 0;
+                }
+                Console.WriteLine("Bucket empty waiting for " + waitTime + "ms");
+                await Task.Delay(waitTime);
+            }
+            if (privmsgBucketTimer.ElapsedMilliseconds > BUCKET_REFILL_RATE)
+            {
+                privmsgBucketTimer.Reset();
+                privmsgBucket = BUCKET_MAX;
+                Console.WriteLine("Bucket refill");
+            }
         }
     }
 }
