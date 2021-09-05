@@ -1,5 +1,5 @@
 # TwitchSwordBot
-C# Bot for twitch.tv primarily made for moderation including homoglyph parsing
+C# Bot for twitch.tv primarily made for moderation including homoglyph parsing (special characters that look like other characters and would otherwise be skipped by simple checks such as 3 as replacement for E)
 
 # Download
 Get the latest version from here: https://github.com/madinsane/TwitchSwordBot/releases
