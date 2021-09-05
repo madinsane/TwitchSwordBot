@@ -18,7 +18,7 @@ You can give the bot commands through its own channel, though you will need to m
 `!leave <channel>` leaves channel (stop reading messages in that channel)  
 `!msg <channel> <message>` or `!m <channel> <message>` send message to channel  
 `!banword <phrase>` add word/phrase to ban list, will timeout any non-moderator for 30s on typing banned word  
-`!unbanword <phrase>` remove word/phrase from ban list
+`!unbanword <phrase>` remove word/phrase from ban list  
 `!kill` shuts down the bot gracefully
 
 # Build instructions
