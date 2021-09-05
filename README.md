@@ -1,6 +1,9 @@
 # TwitchSwordBot
 C# Bot for twitch.tv primarily made for moderation including homoglyph parsing
 
+# Download
+Get the latest version from here: https://github.com/madinsane/TwitchSwordBot/releases
+
 # Setup instructions
 Get a new account on twitch (I advise against using your main channel for this)  
 Login to your bot account  
